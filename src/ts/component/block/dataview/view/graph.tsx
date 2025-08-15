@@ -26,8 +26,13 @@ const ViewGraph = observer(class ViewGraph extends React.Component<I.ViewCompone
 	};
 
 	render () {
-		const { block, className } = this.props;
+		const { block, className, isInline } = this.props;
 		const cn = [ 'viewContent', className ];
+		
+		// Add background color class for inline views with bgColor
+		if (isInline && block.bgColor) {
+			cn.push(`bgColor-${block.bgColor}`);
+		}
 
 		return (
 			<div 
@@ -124,6 +129,7 @@ const ViewGraph = observer(class ViewGraph extends React.Component<I.ViewCompone
 			const rowHeight = 40; // Same as Grid View inline
 			const headerHeight = 120; // More space for controls/header
 			const footerHeight = 44; // Space for FootRow (aggregation row)
+			const loadMoreHeight = 34; // Space for LoadMore button (margin + padding + line-height)
 			const height = Math.max(200, headerHeight + (pageLimit * rowHeight) + footerHeight);
 			
 			node.css({ height });

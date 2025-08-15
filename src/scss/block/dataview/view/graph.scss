@@ -16,6 +16,18 @@
 		.viewContent.viewGraph { 
 			min-height: 300px;
 			/* Height is now dynamically set based on pageLimit */
+			
+			/* Border uses same colors as backgrounds */
+			&.bgColor-grey { border: 3px solid var(--color-shape-tertiary); }
+			&.bgColor-yellow { border: 3px solid var(--color-bg-yellow); }
+			&.bgColor-orange { border: 3px solid var(--color-bg-orange); }
+			&.bgColor-red { border: 3px solid var(--color-bg-red); }
+			&.bgColor-pink { border: 3px solid var(--color-bg-pink); }
+			&.bgColor-purple { border: 3px solid var(--color-bg-purple); }
+			&.bgColor-blue { border: 3px solid var(--color-bg-blue); }
+			&.bgColor-ice { border: 3px solid var(--color-bg-ice); }
+			&.bgColor-teal { border: 3px solid var(--color-bg-teal); }
+			&.bgColor-lime { border: 3px solid var(--color-bg-lime); }
 		}
 	}
 }
