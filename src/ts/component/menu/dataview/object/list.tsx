@@ -70,6 +70,14 @@ const MenuDataviewObjectList = observer(class MenuDataviewObjectList extends Rea
 			if (item.isSection) {
 				content = (<div className="sectionName" style={param.style}>{item.name}</div>);
 			} else
+			if (item.isCurrentlySelected) {
+				content = (
+					<div id="item-currently-selected" className="item currentlySelected" onMouseEnter={e => this.onOver(e, item)} onClick={e => this.onClick(e, item)} style={param.style}>
+						<Icon className="selection" />
+						<div className="name">{item.name}</div>
+					</div>
+				);
+			} else
 			if (item.id == 'add') {
 				content = (
 					<div id="item-add" className="item add" onMouseEnter={e => this.onOver(e, item)} onClick={e => this.onClick(e, item)} style={param.style}>
@@ -310,9 +318,34 @@ const MenuDataviewObjectList = observer(class MenuDataviewObjectList extends Rea
 		if (canEdit) {
 			ret = ret.filter(it => !value.includes(it.id));
 		};
+
 		if (typeNames) {
 			ret.unshift({ isSection: true, name: typeNames });
 		};
+
+		// Add "Currently Selected" option at the very top (only if not already in filter)
+		if (canEdit) {
+			const currentValue = Relation.getArrayValue(data.value);
+			const hasCurrentlySelected = currentValue.includes('__currently_selected__');
+			
+			if (!hasCurrentlySelected) {
+				const selection = S.Common.getRef('selectionProvider');
+				const selectedIds = selection ? selection.get() : [];
+				const displayName = selectedIds.length > 0 
+					? `Currently Selected (${selectedIds.length})`
+					: 'Currently Selected';
+
+				// Add separator if there are items below
+				if (ret.length > 0) {
+					ret.unshift({ isDiv: true });
+				}
+				ret.unshift({ 
+					id: '__currently_selected__', 
+					name: displayName,
+					isCurrentlySelected: true 
+				});
+			}
+		}
 
 		if (data.filter && canAdd && canEdit) {
 			if (ret.length || typeNames) {
@@ -418,6 +451,9 @@ const MenuDataviewObjectList = observer(class MenuDataviewObjectList extends Rea
 				cb(message.targetId);
 				close();
 			});
+		} else if (item.isCurrentlySelected) {
+			// Add "Currently Selected" as special filter ID
+			cb('__currently_selected__');
 		} else {
 			cb(item.id);
 		};
