@@ -1872,6 +1872,7 @@
 	"filterConditionAllIn": "Has all of",
 	"filterConditionInArray": "Has any of",
 	"filterConditionNotInArray": "Has none of",
+	"filterConditionCurrentlySelected": "Currently Selected",
 
 	"inputWithFileTextUrl": "Paste a link",
 

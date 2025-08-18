@@ -224,6 +224,23 @@ class Dataview {
 			it.format = relation.format;
 			it.includeTime = relation.includeTime;
 		};
+
+		// Handle "Currently Selected" filter condition
+		if (it.condition === I.FilterCondition.CurrentlySelected) {
+			const selection = S.Common.getRef('selectionProvider');
+			const selectedIds = selection ? selection.get() : [];
+			
+			if (selectedIds.length > 0) {
+				// Convert to an "In" filter with selected object IDs
+				it.condition = I.FilterCondition.In;
+				it.value = selectedIds;
+			} else {
+				// If nothing is selected, show all (remove this filter)
+				it.condition = I.FilterCondition.None;
+				it.value = null;
+			}
+		};
+
 		return it;
 	};
 

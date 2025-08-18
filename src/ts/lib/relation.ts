@@ -107,6 +107,7 @@ class Relation {
 					{ id: I.FilterCondition.In,			 name: translate('filterConditionInArray') }, 
 					{ id: I.FilterCondition.AllIn,		 name: translate('filterConditionAllIn') }, 
 					{ id: I.FilterCondition.NotIn,		 name: translate('filterConditionNotInArray') },
+					{ id: I.FilterCondition.CurrentlySelected, name: translate('filterConditionCurrentlySelected') },
 					{ id: I.FilterCondition.Empty,		 name: translate('filterConditionEmpty') }, 
 					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty') },
 				]);
