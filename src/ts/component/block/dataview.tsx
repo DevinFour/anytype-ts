@@ -1641,7 +1641,6 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 	onSelectionUpdate () {
 		// Only refresh if this DataView has "Currently Selected" filters
 		if (this.hasCurrentlySelectedFilter()) {
-			console.log('DataView has Currently Selected filter, refreshing data...');
 			this.reloadData();
 		}
 	};

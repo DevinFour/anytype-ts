@@ -481,20 +481,17 @@ const SelectionProvider = observer(forwardRef<SelectionRefProps, Props>((props, 
 
 	const set = (type: I.SelectType, list: string[]) => {
 		const uniqueList = U.Common.arrayUnique(list || []);
-		console.log('Selection set called:', type, uniqueList);
 		ids.current.set(type, uniqueList);
 		renderSelection();
 		
 		// Trigger DataView refresh for "Currently Selected" filters
 		if (type === I.SelectType.Record) {
-			console.log('Triggering DataView refresh for Currently Selected filters');
 			$(window).trigger('updateDataviewSelection');
 		}
 	};
 	
 	const get = (type: I.SelectType, withChildren?: boolean): string[] => {
 		let list: string[] = [ ...new Set(ids.current.get(type) || []) ] as string[];
-		console.log('Selection get called:', type, list);
 
 		if (!list.length) {
 			return [];

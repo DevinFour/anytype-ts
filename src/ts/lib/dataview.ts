@@ -229,13 +229,8 @@ class Dataview {
 		if (Array.isArray(it.value) && it.value.includes('__currently_selected__')) {
 			const selection = S.Common.getRef('selectionProvider');
 			
-			console.log('Processing Currently Selected filter:');
-			console.log('Selection provider:', selection);
-			console.log('Original value:', it.value);
-			
 			// Get selected records (not blocks!)
 			const selectedIds = selection ? selection.get(I.SelectType.Record) : [];
-			console.log('Selected Record IDs:', selectedIds);
 			
 			// Remove the special ID and add real selected IDs
 			let newValue = it.value.filter(id => id !== '__currently_selected__');
@@ -248,7 +243,6 @@ class Dataview {
 			// Remove duplicates
 			it.value = [...new Set(newValue)];
 			
-			console.log('Final filter value:', it.value);
 			
 			// If no real values, show nothing (empty filter)
 			if (it.value.length === 0) {
