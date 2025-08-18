@@ -40,20 +40,26 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 		const length = records.length;
 		const isAllowedObject = this.props.isAllowedObject();
 		const cn = [ 'viewContent', className ];
+		
+		// Calculate total view height for inline mode
+		const wrapperStyle: any = {};
+		if (isInline) {
+			wrapperStyle.height = Relation.getInlineViewHeight(limit);
+			wrapperStyle.overflow = 'hidden';
+		}
 
 		let content = null;
 		if (!length) {
 			content = getEmpty('view');
 		} else
 		if (isInline) {
-			// Use InfiniteLoader for inline mode with fixed height container
+			// Use InfiniteLoader for inline mode 
 			const view = getView();
-			const limit = getLimit();
-			const rowHeight = this.getRowHeight();
-			const containerHeight = limit * rowHeight;
+			// Calculate available height for data (wrapper height minus headers/footers)
+			const dataHeight = wrapperStyle.height - 122; // Approximate height of other elements
 			
 			content = (
-				<div style={{ height: containerHeight, overflow: 'auto' }}>
+				<div style={{ height: dataHeight, overflow: 'auto' }}>
 					<InfiniteLoader
 						loadMoreRows={this.loadMoreRows}
 						isRowLoaded={({ index }) => !!records[index]}
@@ -64,10 +70,10 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 							<AutoSizer disableHeight={true}>
 								{({ width }) => (
 									<List
-										height={containerHeight}
+										height={dataHeight}
 										width={width}
 										rowCount={length}
-										rowHeight={rowHeight}
+										rowHeight={this.getRowHeight()}
 										onRowsRendered={onRowsRendered}
 										rowRenderer={({ key, index, style }) => (
 											<BodyRow 
@@ -136,6 +142,7 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 			<div 
 				ref={node => this.node = node}
 				className="wrap"
+				style={wrapperStyle}
 			>
 				<div id="scroll" className="scroll">
 					<div id="scrollWrap" className="scrollWrap">

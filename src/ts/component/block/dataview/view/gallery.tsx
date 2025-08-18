@@ -122,14 +122,12 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 		let content = null;
 
 		if (isInline) {
-			// Use InfiniteLoader for inline mode with fixed height container
+			// Use InfiniteLoader for inline mode
 			const view = getView();
 			const limit = getLimit();
+			const viewHeight = Relation.getInlineViewHeight(limit);
+			const containerHeight = viewHeight;
 			const cardHeight = this.getCardHeight();
-			// Estimate rows needed based on cards per row and total cards
-			const cardsPerRow = this.columnCount || 1;
-			const estimatedRows = Math.ceil(limit / cardsPerRow);
-			const containerHeight = estimatedRows * cardHeight;
 			
 			content = (
 				<div style={{ height: containerHeight, overflow: 'auto' }}>

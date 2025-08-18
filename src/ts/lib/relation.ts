@@ -650,6 +650,32 @@ class Relation {
 	};
 
 	/**
+	 * Gets the fixed pixel height for inline views based on pageLimit.
+	 * This ensures consistent heights across all view types (Grid, List, Gallery, Graph).
+	 * @param {number} pageLimit - The page limit value.
+	 * @returns {number} The pixel height for the view container.
+	 */
+	public getInlineViewHeight (pageLimit: number): number {
+		// Map pageLimit values to fixed pixel heights
+		// These provide consistent view sizes across all view types
+		const heightMap: { [key: number]: number } = {
+			10: 400,   // Extra small
+			12: 400,   // Small (Gallery) - same as 10
+			20: 500,   // Small
+			24: 500,   // Medium (Gallery) - same as 20
+			50: 600,   // Medium
+			60: 600,   // Large (Gallery) - same as 50
+			70: 700,   // Large
+			84: 700,   // Extra large (Gallery) - same as 70
+			100: 800,  // Extra large
+			120: 800   // Maximum (Gallery) - same as 100
+		};
+
+		// Return mapped height or default 600
+		return heightMap[pageLimit] || 600;
+	};
+
+	/**
 	 * Gets dictionary options for a relation key.
 	 * @param {string} relationKey - The relation key.
 	 * @returns {Array<{id: string, name: string}>} The dictionary options.

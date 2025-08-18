@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { AutoSizer, WindowScroller, List, InfiniteLoader } from 'react-virtualized';
 import { Icon, LoadMore } from 'Component';
-import { I, S, U, translate } from 'Lib';
+import { I, S, U, translate, Relation } from 'Lib';
 import Row from './list/row';
 
 const HEIGHT = 32;
@@ -29,6 +29,13 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 		const length = records.length;
 		const isAllowedObject = this.props.isAllowedObject();
 		const cn = [ 'viewContent', className ];
+		
+		// Calculate total view height for inline mode
+		const wrapperStyle: any = {};
+		if (isInline) {
+			wrapperStyle.height = Relation.getInlineViewHeight(limit);
+			wrapperStyle.overflow = 'hidden';
+		}
 
 		if (!length) {
 			return getEmpty('view');
@@ -37,14 +44,13 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 		let content = null;
 
 		if (isInline) {
-			// Use InfiniteLoader for inline mode with fixed height container
+			// Use InfiniteLoader for inline mode
 			const view = getView();
-			const limit = getLimit();
+			const dataHeight = wrapperStyle.height - 40; // Subtract "New Object" button height
 			const rowHeight = 40; // Same as Grid View inline mode
-			const containerHeight = limit * rowHeight;
 			
 			content = (
-				<div style={{ height: containerHeight, overflow: 'auto' }}>
+				<div style={{ height: dataHeight, overflow: 'auto' }}>
 					<InfiniteLoader
 						isRowLoaded={({ index }) => !!records[index]}
 						loadMoreRows={this.loadMoreRows}
@@ -55,7 +61,7 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 							<AutoSizer disableHeight={true}>
 								{({ width }) => (
 									<List
-										height={containerHeight}
+										height={dataHeight}
 										width={width}
 										rowCount={length}
 										rowHeight={rowHeight}
@@ -124,6 +130,7 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 			<div 
 				ref={node => this.node = node} 
 				className="wrap"
+				style={wrapperStyle}
 			>
 				<div id="scroll" className="scroll">
 					<div id="scrollWrap" className="scrollWrap">

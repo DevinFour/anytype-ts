@@ -1,7 +1,7 @@
 import * as React from 'react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
-import { I, C, S, U, J, Dataview } from 'Lib';
+import { I, C, S, U, J, Dataview, Relation } from 'Lib';
 import { GraphProvider } from 'Component';
 
 const PADDING = 46;
@@ -122,15 +122,10 @@ const ViewGraph = observer(class ViewGraph extends React.Component<I.ViewCompone
 
 			node.css({ width: cw, height: Math.max(600, ch - top - 2), marginLeft: -margin - 2 });
 		} else {
-			// For inline views: use pageLimit to determine height
-			// Same logic as Grid View: 40px per row for inline
-			const view = getView();
-			const pageLimit = view?.pageLimit || 50;
-			const rowHeight = 40; // Same as Grid View inline
-			const headerHeight = 120; // More space for controls/header
-			const footerHeight = 44; // Space for FootRow (aggregation row)
-			const loadMoreHeight = 34; // Space for LoadMore button (margin + padding + line-height)
-			const height = Math.max(200, headerHeight + (pageLimit * rowHeight) + footerHeight);
+			// For inline views: use centralized height calculation
+			const { getLimit } = this.props;
+			const limit = getLimit();
+			const height = Relation.getInlineViewHeight(limit);
 			
 			node.css({ height });
 		};
