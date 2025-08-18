@@ -16,10 +16,16 @@ const MenuDataviewSize = observer(class MenuDataviewSize extends React.Component
 	render () {
 		const { param } = this.props;
 		const { data } = param;
-		const { currentPageLimit } = data;
+		const { rootId, blockId } = data;
 		
-		const currentSize = Relation.mapPageLimitToViewSize(currentPageLimit || 20);
+		// Get current pageLimit dynamically from the block state
+		const block = S.Block.getLeaf(rootId, blockId);
+		const views = block?.content?.views || [];
+		const currentPageLimit = views.length > 0 ? views[0].pageLimit : 20;
+		
+		const currentSize = Relation.mapPageLimitToViewSize(currentPageLimit);
 		const options = Relation.getViewSizeOptions();
+		
 
 		return (
 			<div>
@@ -29,7 +35,7 @@ const MenuDataviewSize = observer(class MenuDataviewSize extends React.Component
 							<MenuItemVertical 
 								key={i} 
 								{...option} 
-								checkbox={option.id === currentSize}
+								checkbox={option.id === String(currentSize)}
 								onClick={e => this.onClick(e, option)} 
 								onMouseEnter={e => this.onOver(e, option)}
 							/>
@@ -74,13 +80,24 @@ const MenuDataviewSize = observer(class MenuDataviewSize extends React.Component
 		// Update ALL views in the DataView block
 		const block = S.Block.getLeaf(rootId, blockId);
 		if (block && block.content.views) {
+			let updatesCompleted = 0;
+			const totalUpdates = block.content.views.length;
+			
 			block.content.views.forEach((view: any) => {
-				Dataview.viewUpdate(rootId, blockId, view.id, { pageLimit: newPageLimit });
+				// Update the local block state immediately
+				view.pageLimit = newPageLimit;
+				
+				Dataview.viewUpdate(rootId, blockId, view.id, { pageLimit: newPageLimit }, () => {
+					updatesCompleted++;
+					if (updatesCompleted === totalUpdates) {
+						// All updates completed, force update the UI
+						this.forceUpdate();
+						if (onSizeChange) {
+							onSizeChange(newPageLimit);
+						}
+					}
+				});
 			});
-		}
-		
-		if (onSizeChange) {
-			onSizeChange(newPageLimit);
 		}
 		
 		close();
