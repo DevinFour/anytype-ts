@@ -91,6 +91,8 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 		this.onEditModeClick = this.onEditModeClick.bind(this);
 		this.setRecordEditingOn = this.setRecordEditingOn.bind(this);
 		this.setRecordEditingOff = this.setRecordEditingOff.bind(this);
+		this.onSelectionUpdate = this.onSelectionUpdate.bind(this);
+		this.hasCurrentlySelectedFilter = this.hasCurrentlySelectedFilter.bind(this);
 	};
 
 	render () {
@@ -353,6 +355,7 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 		win.on(`updateDataviewData.${ns}`, () => this.loadData(this.getView().id, 0, true));
 		win.on(`setDataviewSource.${ns}`, () => this.onSourceSelect(`#block-head-${block.id} #value`, { offsetY: 36 }));
 		win.on(`selectionEnd.${ns} selectionClear.${ns} selectionSet.${ns}`, () => this.onSelectEnd());
+		win.on(`updateDataviewSelection.${ns}`, () => this.onSelectionUpdate());
 	};
 
 	onKeyDown (e: any) {
@@ -1633,6 +1636,29 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 
 	analyticsRoute () {
 		return this.isCollection() ? analytics.route.collection : analytics.route.set;
+	};
+
+	onSelectionUpdate () {
+		// Only refresh if this DataView has "Currently Selected" filters
+		if (this.hasCurrentlySelectedFilter()) {
+			console.log('DataView has Currently Selected filter, refreshing data...');
+			this.reloadData();
+		}
+	};
+
+	hasCurrentlySelectedFilter (): boolean {
+		const view = this.getView();
+		if (!view || !view.filters) {
+			return false;
+		}
+		
+		// Check if any filter contains "__currently_selected__" in its value
+		return view.filters.some(filter => {
+			if (Array.isArray(filter.value)) {
+				return filter.value.includes('__currently_selected__');
+			}
+			return false;
+		});
 	};
 
 	resize () {

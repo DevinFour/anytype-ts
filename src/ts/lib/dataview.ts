@@ -225,19 +225,35 @@ class Dataview {
 			it.includeTime = relation.includeTime;
 		};
 
-		// Handle "Currently Selected" filter condition
-		if (it.condition === I.FilterCondition.CurrentlySelected) {
+		// Handle "Currently Selected" special filter value
+		if (Array.isArray(it.value) && it.value.includes('__currently_selected__')) {
 			const selection = S.Common.getRef('selectionProvider');
-			const selectedIds = selection ? selection.get() : [];
+			
+			console.log('Processing Currently Selected filter:');
+			console.log('Selection provider:', selection);
+			console.log('Original value:', it.value);
+			
+			// Get selected records (not blocks!)
+			const selectedIds = selection ? selection.get(I.SelectType.Record) : [];
+			console.log('Selected Record IDs:', selectedIds);
+			
+			// Remove the special ID and add real selected IDs
+			let newValue = it.value.filter(id => id !== '__currently_selected__');
 			
 			if (selectedIds.length > 0) {
-				// Convert to an "In" filter with selected object IDs
+				// Add selected object IDs to the filter
+				newValue = newValue.concat(selectedIds);
+			}
+			
+			// Remove duplicates
+			it.value = [...new Set(newValue)];
+			
+			console.log('Final filter value:', it.value);
+			
+			// If no real values, show nothing (empty filter)
+			if (it.value.length === 0) {
 				it.condition = I.FilterCondition.In;
-				it.value = selectedIds;
-			} else {
-				// If nothing is selected, show all (remove this filter)
-				it.condition = I.FilterCondition.None;
-				it.value = null;
+				it.value = ['__no_matches__']; // Use dummy ID that won't match anything
 			}
 		};
 
