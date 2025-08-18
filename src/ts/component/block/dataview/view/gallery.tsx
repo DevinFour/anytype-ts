@@ -1,7 +1,7 @@
 import * as React from 'react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
-import { AutoSizer, WindowScroller, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
+import { AutoSizer, WindowScroller, List, CellMeasurer, CellMeasurerCache, InfiniteLoader } from 'react-virtualized';
 import { I, S, U, J, Relation, Dataview } from 'Lib';
 import { LoadMore } from 'Component';
 import Card from './gallery/card';
@@ -122,11 +122,35 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 		let content = null;
 
 		if (isInline) {
-			const records = this.getRecords();
+			// Use InfiniteLoader for inline mode with fixed height container
+			const view = getView();
+			const pageLimit = view?.pageLimit || 50;
+			const cardHeight = this.getCardHeight();
+			// Estimate rows needed based on cards per row and total cards
+			const cardsPerRow = this.columnCount || 1;
+			const estimatedRows = Math.ceil(pageLimit / cardsPerRow);
+			const containerHeight = estimatedRows * cardHeight;
+			
 			content = (
-				<>
-					{records.map((id: string, index: number) => cardItem(index, id))}
-				</>
+				<div style={{ height: containerHeight, overflow: 'auto' }}>
+					<InfiniteLoader
+						isRowLoaded={({ index }) => !!items[index]}
+						loadMoreRows={this.loadMoreCards}
+						rowCount={items.length}
+						threshold={5}
+					>
+						{({ onRowsRendered }) => (
+							<List
+								height={containerHeight}
+								width={0} // Will be set by CSS
+								rowCount={items.length}
+								rowHeight={cardHeight}
+								onRowsRendered={onRowsRendered}
+								rowRenderer={rowRenderer}
+							/>
+						)}
+					</InfiniteLoader>
+				</div>
 			);
 		} else {
 			content = (
@@ -160,9 +184,7 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 						{content}
 					</div>
 
-					{limit + offset < total ? (
-						<LoadMore limit={limit} loaded={records.length} total={total} onClick={this.loadMoreCards} />
-					) : ''}
+					{/* LoadMore removed - using InfiniteLoader for inline mode */}
 				</div>
 			</div>
 		);

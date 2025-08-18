@@ -46,17 +46,41 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 			content = getEmpty('view');
 		} else
 		if (isInline) {
+			// Use InfiniteLoader for inline mode with fixed height container
+			const view = getView();
+			const pageLimit = view?.pageLimit || 50;
+			const rowHeight = this.getRowHeight();
+			const containerHeight = pageLimit * rowHeight;
+			
 			content = (
-				<div>
-					{records.map((id: string, index: number) => (
-						<BodyRow 
-							key={'grid-row-' + view.id + index} 
-							{...this.props} 
-							recordId={records[index]}
-							cellPosition={this.cellPosition}
-							getColumnWidths={this.getColumnWidths}
-						/>
-					))}
+				<div style={{ height: containerHeight, overflow: 'auto' }}>
+					<InfiniteLoader
+						loadMoreRows={this.loadMoreRows}
+						isRowLoaded={({ index }) => !!records[index]}
+						rowCount={total}
+						threshold={10}
+					>
+						{({ onRowsRendered }) => (
+							<List
+								height={containerHeight}
+								width={0} // Will be set by CSS
+								rowCount={length}
+								rowHeight={rowHeight}
+								onRowsRendered={onRowsRendered}
+								rowRenderer={({ key, index, style }) => (
+									<BodyRow 
+										key={`grid-row-inline-${view.id + index}`} 
+										{...this.props} 
+										recordId={records[index]}
+										recordIdx={index}
+										style={style}
+										cellPosition={this.cellPosition}
+										getColumnWidths={this.getColumnWidths}
+									/>
+								)}
+							/>
+						)}
+					</InfiniteLoader>
 				</div>
 			);
 		} else {
@@ -139,9 +163,7 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 								getColumnWidths={this.getColumnWidths}
 							/>
 
-							{isInline && (limit + offset < total) ? (
-								<LoadMore limit={getLimit()} loaded={records.length} total={total} onClick={this.loadMoreRows} />
-							) : ''}
+							{/* LoadMore removed - using InfiniteLoader for inline mode */}
 						</div>
 					</div>
 				</div>

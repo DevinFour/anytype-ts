@@ -37,17 +37,40 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 		let content = null;
 
 		if (isInline) {
+			// Use InfiniteLoader for inline mode with fixed height container
+			const view = getView();
+			const pageLimit = view?.pageLimit || 50;
+			const rowHeight = 48; // Standard row height for List View
+			const containerHeight = pageLimit * rowHeight;
+			
 			content = (
-				<div>
-					{records.map((id: string, index: number) => (
-						<Row
-							ref={ref => onRefRecord(ref, id)}
-							key={'grid-row-' + view.id + index}
-							{...this.props}
-							recordId={id}
-							readonly={!isAllowedObject}
-						/>
-					))}
+				<div style={{ height: containerHeight, overflow: 'auto' }}>
+					<InfiniteLoader
+						isRowLoaded={({ index }) => !!records[index]}
+						loadMoreRows={this.loadMoreRows}
+						rowCount={total}
+						threshold={10}
+					>
+						{({ onRowsRendered }) => (
+							<List
+								height={containerHeight}
+								width={0} // Will be set by CSS
+								rowCount={length}
+								rowHeight={rowHeight}
+								onRowsRendered={onRowsRendered}
+								rowRenderer={({ key, index, style }) => (
+									<Row
+										ref={ref => onRefRecord(ref, records[index])}
+										key={`list-row-inline-${view.id + index}`}
+										{...this.props}
+										recordId={records[index]}
+										readonly={!isAllowedObject}
+										style={style}
+									/>
+								)}
+							/>
+						)}
+					</InfiniteLoader>
 				</div>
 			);
 		} else {
@@ -114,9 +137,7 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 								</div>
 							) : null}
 
-							{isInline && (limit + offset < total) ? (
-								<LoadMore limit={getLimit()} loaded={records.length} total={total} onClick={this.loadMoreRows} />
-							) : ''}
+							{/* LoadMore removed - using InfiniteLoader for inline mode */}
 						</div>
 					</div>
 				</div>
