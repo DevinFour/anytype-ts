@@ -123,13 +123,12 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 
 		if (isInline) {
 			// Use InfiniteLoader for inline mode
-			const view = getView();
-			const limit = getLimit();
-			const containerHeight = Relation.getInlineViewHeight(limit); // Use numeric height for react-virtualized
+			const containerHeight = Relation.getInlineViewHeight(limit);
+			const dataHeight = containerHeight - 40; // Subtract space for "New Object" button
 			const cardHeight = this.getCardHeight();
 			
 			content = (
-				<div style={{ height: containerHeight, overflow: 'auto' }}>
+				<div style={{ height: dataHeight, overflow: 'auto' }}>
 					<InfiniteLoader
 						isRowLoaded={({ index }) => !!items[index]}
 						loadMoreRows={this.loadMoreCards}
@@ -138,16 +137,23 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 					>
 						{({ onRowsRendered }) => (
 							<AutoSizer disableHeight={true}>
-								{({ width }) => (
-									<List
-										height={containerHeight}
-										width={width}
-										rowCount={items.length}
-										rowHeight={cardHeight}
-										onRowsRendered={onRowsRendered}
-										rowRenderer={rowRenderer}
-									/>
-								)}
+								{({ width }) => {
+									// Set width for inline mode so getItems() works
+									if (width && !this.width) {
+										this.width = width;
+										this.setColumnCount();
+									}
+									return (
+										<List
+											height={dataHeight}
+											width={width}
+											rowCount={items.length}
+											rowHeight={cardHeight}
+											onRowsRendered={onRowsRendered}
+											rowRenderer={rowRenderer}
+										/>
+									);
+								}}
 							</AutoSizer>
 						)}
 					</InfiniteLoader>
@@ -279,11 +285,16 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 	};
 
 	getItems () {
-		if (!this.width) {
+		const { isInline } = this.props;
+		
+		// For inline mode, use default column count if width not set yet
+		if (!this.width && isInline) {
+			this.columnCount = 1; // Default to single column for inline
+		} else if (!this.width) {
 			return [];
-		};
-
-		this.setColumnCount();
+		} else {
+			this.setColumnCount();
+		}
 
 		const records = this.getRecords();
 		const ret: any[] = [];
