@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { Icon, Editable } from 'Component';
-import { I, C, S, U, J, keyboard, analytics, translate, Dataview } from 'Lib';
+import { I, C, S, U, J, keyboard, analytics, translate, Dataview, Relation } from 'Lib';
 
 interface State {
 	isEditing: boolean;
@@ -118,6 +118,7 @@ const Head = observer(class Head extends React.Component<I.ViewComponent, State>
 
 		const options: any[] = [
 			canEdit ? { id: 'editTitle', icon: 'editText', name: translate('blockDataviewHeadMenuEdit') } : null,
+			{ id: 'viewSize', icon: 'resize', name: translate('blockDataviewHeadMenuSize') },
 			canSource ? { id: 'sourceChange', icon: 'source', name: U.Common.sprintf(translate('blockDataviewHeadMenuChange'), sourceName), arrow: true } : null,
 			{ id: 'sourceOpen', icon: 'expand', name: U.Common.sprintf(translate('blockDataviewHeadMenuOpen'), sourceName) },
 		].filter(it => it);
@@ -244,12 +245,33 @@ const Head = observer(class Head extends React.Component<I.ViewComponent, State>
 			return;
 		};
 
-		const { getTarget } = this.props;
+		const { rootId, block, getTarget } = this.props;
 		const object = getTarget();
 
 		switch (item.id) {
 			case 'editTitle': {
 				this.setEditing(true);
+				break;
+			};
+
+			case 'viewSize': {
+				// Get current pageLimit from any view (they should all be the same now)
+				const views = block.content.views || [];
+				const currentPageLimit = views.length > 0 ? views[0].pageLimit : 20;
+				
+				S.Menu.open('dataviewSize', {
+					element: `#block-head-${block.id}`,
+					offsetY: 4,
+					width: 200,
+					data: {
+						rootId,
+						blockId: block.id,
+						currentPageLimit,
+						onSizeChange: (newPageLimit: number) => {
+							console.log('Size changed to pageLimit:', newPageLimit);
+						}
+					}
+				});
 				break;
 			};
 

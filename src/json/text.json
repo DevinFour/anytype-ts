@@ -675,6 +675,7 @@
 	"blockDataviewSelectionSelected": "%s selected",
 
 	"blockDataviewHeadMenuEdit": "Edit title",
+	"blockDataviewHeadMenuSize": "Inline Query Size",
 	"blockDataviewHeadMenuChange": "Change source %s",
 	"blockDataviewHeadMenuOpen": "Open source %s",
 

@@ -66,6 +66,7 @@ import MenuDataviewSort from './dataview/sort';
 import MenuDataviewViewList from './dataview/view/list';
 import MenuDataviewViewSettings from './dataview/view/settings';
 import MenuDataviewViewLayout from './dataview/view/layout';
+import MenuDataviewSize from './dataview/size';
 import MenuDataviewOptionList from './dataview/option/list';
 import MenuDataviewOptionEdit from './dataview/option/edit';
 import MenuDataviewText from './dataview/text';
@@ -152,6 +153,7 @@ const Components: any = {
 	dataviewViewList:		 MenuDataviewViewList,
 	dataviewViewSettings:	 MenuDataviewViewSettings,
 	dataviewViewLayout:	 	 MenuDataviewViewLayout,
+	dataviewSize:			 MenuDataviewSize,
 	dataviewText:			 MenuDataviewText,
 	dataviewSource:			 MenuDataviewSource,
 	dataviewCreateBookmark:	 MenuDataviewCreateBookmark,
