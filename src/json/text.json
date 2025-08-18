@@ -1704,7 +1704,7 @@
 	"menuDataviewViewEditColorColumns": "Color columns",
 	"menuDataviewViewEditShowIcon": "Show icon",
 	"menuDataviewViewEditPageLimit": "Page limit",
-	"menuDataviewViewEditSize": "Size",
+	"menuDataviewViewEditSize": "Inline Query Size",
 	"menuDataviewViewEditViewAs": "View as",
 	"menuDataviewViewEditDuplicateView": "Duplicate view",
 	"menuDataviewViewEditRemoveView": "Remove view",

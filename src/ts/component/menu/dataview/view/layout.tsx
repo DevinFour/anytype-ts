@@ -370,7 +370,18 @@ const MenuViewLayout = observer(class MenuViewLayout extends React.Component<I.M
 						this.onAddRelation(item.id);
 					} else if (item.id == 'viewSize') {
 						// Convert ViewSize to pageLimit for storage
-						this.param.pageLimit = Relation.mapViewSizeToPageLimit(el.id);
+						const newPageLimit = Relation.mapViewSizeToPageLimit(el.id);
+						this.param.pageLimit = newPageLimit;
+						
+						// Update ALL views in this DataView block with the same pageLimit
+						const { rootId, blockId } = data;
+						const block = S.Block.getLeaf(rootId, blockId);
+						if (block && block.content.views) {
+							block.content.views.forEach((view: any) => {
+								Dataview.viewUpdate(rootId, blockId, view.id, { pageLimit: newPageLimit });
+							});
+						}
+						
 						this.save();
 						this.menuContext.close();
 					} else {
