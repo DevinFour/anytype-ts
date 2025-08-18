@@ -241,12 +241,14 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 						{...dataviewProps} 
 						onFilterChange={this.onFilterChange}
 					/>
-					<Selection 
-						ref={ref => this.refSelect = ref} 
-						{...this.props} 
-						{...dataviewProps} 
-						multiSelectAction={this.multiSelectAction} 
-					/>
+					{!isInline ? (
+						<Selection 
+							ref={ref => this.refSelect = ref} 
+							{...this.props} 
+							{...dataviewProps} 
+							multiSelectAction={this.multiSelectAction} 
+						/>
+					) : null}
 				</div>
 				{body}
 			</div>
@@ -1477,6 +1479,7 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 	};
 
 	selectionCheck () {
+		const { isInline } = this.props;
 		const selection = S.Common.getRef('selectionProvider');
 		const node = $(this.node);
 		const con = node.find('#dataviewControls');
@@ -1484,8 +1487,15 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 		const ids = selection?.get(I.SelectType.Record) || [];
 		const length = ids.length;
 
-		length ? con.hide() : con.show();
-		length ? sel.show() : sel.hide();
+		if (isInline) {
+			// For inline DataViews, always keep normal controls visible
+			con.show();
+			sel.hide();
+		} else {
+			// For fullscreen DataViews, use original logic
+			length ? con.hide() : con.show();
+			length ? sel.show() : sel.hide();
+		}
 	};
 
 	onSelectEnd () {
