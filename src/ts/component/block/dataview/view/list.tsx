@@ -39,9 +39,9 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 		if (isInline) {
 			// Use InfiniteLoader for inline mode with fixed height container
 			const view = getView();
-			const pageLimit = view?.pageLimit || 50;
+			const limit = getLimit();
 			const rowHeight = 40; // Same as Grid View inline mode
-			const containerHeight = pageLimit * rowHeight;
+			const containerHeight = limit * rowHeight;
 			
 			content = (
 				<div style={{ height: containerHeight, overflow: 'auto' }}>
