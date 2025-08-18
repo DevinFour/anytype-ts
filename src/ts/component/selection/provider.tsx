@@ -586,8 +586,8 @@ const SelectionProvider = observer(forwardRef<SelectionRefProps, Props>((props, 
 				};
 
 				for (const id of list) {
-					// Use global selector to find all SelectionTargets across all DataViews
-					$(`#selectionTarget-${id}`).addClass('isSelectionSelected');
+					// Use data-id attribute selector to find all SelectionTargets across all DataViews
+					$(`.selectionTarget[data-id="${id}"]`).addClass('isSelectionSelected');
 
 					if (type == I.SelectType.Block) {
 						$(`#block-${id}`).addClass('isSelectionSelected');

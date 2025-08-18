@@ -23,7 +23,6 @@ const SelectionTarget: FC<Props> = ({
 
 	return (
 		<div 
-			id={`selectionTarget-${id}`} 
 			className={cn.join(' ')}
 			style={style}
 			onContextMenu={onContextMenu}
