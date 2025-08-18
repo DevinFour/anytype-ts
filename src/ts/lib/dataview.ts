@@ -234,6 +234,9 @@ class Dataview {
 			// Get selected records (not blocks!)
 			const selectedIds = selection ? selection.get(I.SelectType.Record) : [];
 			
+			// Check if this filter ONLY contains "__currently_selected__" (no other objects)
+			const hadOnlyCurrentlySelected = filter.value.length === 1 && filter.value[0] === '__currently_selected__';
+			
 			// Remove the special ID and add real selected IDs
 			let newValue = filter.value.filter(id => id !== '__currently_selected__');
 			
@@ -245,10 +248,17 @@ class Dataview {
 			// Remove duplicates
 			filter.value = [...new Set(newValue)];
 			
-			// If no real values, show nothing (empty filter)
+			// If no real values after processing
 			if (filter.value.length === 0) {
-				filter.condition = I.FilterCondition.In;
-				filter.value = ['__no_matches__']; // Use dummy ID that won't match anything
+				if (hadOnlyCurrentlySelected) {
+					// "Currently Selected" alone + no selection = show ALL objects (disable this filter)
+					filter.condition = I.FilterCondition.NotEqual;
+					filter.value = ['__show_all__']; // Special value that won't match any real object
+				} else {
+					// Mixed filter + no selection = show nothing
+					filter.condition = I.FilterCondition.In;
+					filter.value = ['__no_matches__']; // Use dummy ID that won't match anything
+				}
 			}
 		};
 
