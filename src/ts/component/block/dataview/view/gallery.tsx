@@ -142,7 +142,7 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 						{({ onRowsRendered }) => (
 							<List
 								height={containerHeight}
-								width={0} // Will be set by CSS
+								width={1000} // Large enough width for content
 								rowCount={items.length}
 								rowHeight={cardHeight}
 								onRowsRendered={onRowsRendered}

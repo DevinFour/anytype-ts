@@ -54,7 +54,7 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 						{({ onRowsRendered }) => (
 							<List
 								height={containerHeight}
-								width={0} // Will be set by CSS
+								width={1000} // Large enough width for content
 								rowCount={length}
 								rowHeight={rowHeight}
 								onRowsRendered={onRowsRendered}
