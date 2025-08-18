@@ -961,12 +961,23 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 		if ((relationKey == 'name') && ref.isEditing && !ref.isEditing() && !isRecordEditing) {
 			const ids = selection?.get(I.SelectType.Record) || [];
 
-			if (keyboard.withCommand(e)) {
-				if (!ids.length) {
-					U.Object.openPopup(record);
+			// Check for double-click to open object
+			if (e.detail === 2) {
+				if (keyboard.withCommand(e)) {
+					if (!ids.length) {
+						U.Object.openPopup(record);
+					};
+				} else {
+					U.Object.openConfig(record);
 				};
 			} else {
-				U.Object.openConfig(record);
+				// Single click = selection (if selectionProvider exists)
+				if (selection) {
+					this.onSelectToggle(e, record.id);
+				} else {
+					// Fallback: open object if no selection system
+					U.Object.openConfig(record);
+				}
 			};
 		} else {
 			ref.onClick(e);

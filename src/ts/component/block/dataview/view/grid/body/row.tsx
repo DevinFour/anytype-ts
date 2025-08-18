@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { I, U, keyboard } from 'Lib';
+import { I, U, keyboard, S } from 'Lib';
 import { observer } from 'mobx-react';
 import { DropTarget, Icon, SelectionTarget } from 'Component';
 import Cell from './cell';
@@ -47,19 +47,12 @@ const BodyRow = observer(class BodyRow extends React.Component<Props> {
 			</>
 		);
 
-		if (isInline) {
-			content = (
-				<div style={{ gridTemplateColumns: str, display: 'grid' }}>
-					{content}
-				</div>
-			);
-		} else {
-			content = (
-				<SelectionTarget id={record.id} type={I.SelectType.Record} style={{ gridTemplateColumns: str }}>
-					{content}
-				</SelectionTarget>
-			);
-		};
+		// Enable SelectionTarget for both inline and fullscreen views
+		content = (
+			<SelectionTarget id={record.id} type={I.SelectType.Record} style={{ gridTemplateColumns: str, display: isInline ? 'grid' : 'block' }}>
+				{content}
+			</SelectionTarget>
+		);
 
 		if (isCollection && !isInline) {
 			content = (
@@ -87,11 +80,49 @@ const BodyRow = observer(class BodyRow extends React.Component<Props> {
 				ref={ref => onRefRecord(ref, record.id)}
 				className={cn.join(' ')}
 				style={style}
+				onClick={e => this.onClick(e)}
 				onContextMenu={e => onContext(e, record.id)}
 			>
 				{content}
 			</div>
 		);
+	};
+
+	onClick (e: any) {
+		e.preventDefault();
+
+		const { onContext, recordId, getRecord, onSelectToggle } = this.props;
+		const record = getRecord(recordId);
+		const selection = S.Common.getRef('selectionProvider');
+		
+		// Check for double-click to open object
+		if (e.detail === 2) {
+			keyboard.withCommand(e) ? U.Object.openEvent(e, record) : U.Object.openConfig(record);
+			return;
+		}
+		
+		// Single click = selection (if selectionProvider exists)
+		if (selection && onSelectToggle) {
+			onSelectToggle(e, record.id);
+			return;
+		}
+		
+		// Fallback behavior if no selection system
+		const cb = {
+			0: () => {
+				keyboard.withCommand(e) ? U.Object.openEvent(e, record) : U.Object.openConfig(record); 
+			},
+			2: () => onContext(e, record.id)
+		};
+
+		const ids = selection?.get(I.SelectType.Record) || [];
+		if ((keyboard.withCommand(e) && ids.length) || keyboard.isSelectionClearDisabled) {
+			return;
+		};
+
+		if (cb[e.button]) {
+			cb[e.button]();
+		};
 	};
 
 });
