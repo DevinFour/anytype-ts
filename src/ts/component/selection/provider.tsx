@@ -586,15 +586,16 @@ const SelectionProvider = observer(forwardRef<SelectionRefProps, Props>((props, 
 				};
 
 				for (const id of list) {
-					container.find(`#selectionTarget-${id}`).addClass('isSelectionSelected');
+					// Use global selector to find all SelectionTargets across all DataViews
+					$(`#selectionTarget-${id}`).addClass('isSelectionSelected');
 
 					if (type == I.SelectType.Block) {
-						container.find(`#block-${id}`).addClass('isSelectionSelected');
+						$(`#block-${id}`).addClass('isSelectionSelected');
 
 						const childrenIds = getChildrenIds(id);
 						if (childrenIds.length) {
 							childrenIds.forEach(childId => {
-								container.find(`#block-${childId}`).addClass('isSelectionSelected');
+								$(`#block-${childId}`).addClass('isSelectionSelected');
 							});
 						};
 					};

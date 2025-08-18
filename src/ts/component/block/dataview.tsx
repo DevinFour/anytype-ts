@@ -1429,17 +1429,33 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 		e.preventDefault();
 		e.stopPropagation();
 
-		const { isInline } = this.props;
 		const selection = S.Common.getRef('selectionProvider');
 
-		if (!selection || isInline) {
+		if (!selection) {
 			return;
 		};
 
 		let ids = selection.get(I.SelectType.Record);
-		ids = ids.includes(id) ? ids.filter(it => it != id) : ids.concat([ id ]);
+		
+		// For single selection per page (without shift key)
+		if (!e.shiftKey) {
+			// If clicking on already selected item, deselect it
+			if (ids.includes(id)) {
+				ids = [];
+			} else {
+				// Clear all selections and select only this item
+				ids = [ id ];
+			}
+		} else {
+			// With shift key: toggle selection (multi-select)
+			ids = ids.includes(id) ? ids.filter(it => it != id) : ids.concat([ id ]);
+		}
+		
 		selection.set(I.SelectType.Record, ids);
 
+		// Trigger global selection update for all DataView components
+		$(window).trigger('selectionSet');
+		
 		this.setSelected(ids);
 		this.selectionCheck();
 	};
@@ -1457,10 +1473,10 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 	};
 
 	onSelectEnd () {
-		const { isInline, readonly } = this.props;
+		const { readonly } = this.props;
 		const selection = S.Common.getRef('selectionProvider');
 
-		if (!selection || isInline || readonly) {
+		if (!selection || readonly) {
 			return;
 		};
 

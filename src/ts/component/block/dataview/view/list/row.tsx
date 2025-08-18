@@ -113,13 +113,12 @@ const Row = observer(class Row extends React.Component<Props> {
 			</div>
 		);
 
-		if (!isInline) {
-			content = (
-				<SelectionTarget id={record.id} type={I.SelectType.Record}>
-					{content}
-				</SelectionTarget>
-			);
-		};
+		// Enable SelectionTarget for both inline and fullscreen views
+		content = (
+			<SelectionTarget id={record.id} type={I.SelectType.Record}>
+				{content}
+			</SelectionTarget>
+		);
 
 		if (isCollection && !isInline) {
 			content = (
@@ -169,9 +168,22 @@ const Row = observer(class Row extends React.Component<Props> {
 	onClick (e: any) {
 		e.preventDefault();
 
-		const { onContext, recordId, getRecord } = this.props;
+		const { onContext, recordId, getRecord, onSelectToggle } = this.props;
 		const record = getRecord(recordId);
 		const selection = S.Common.getRef('selectionProvider');
+		
+		// Check for double-click to open object
+		if (e.detail === 2) {
+			keyboard.withCommand(e) ? U.Object.openEvent(e, record) : U.Object.openConfig(record);
+			return;
+		}
+		
+		// Single click = selection (if selectionProvider exists)
+		if (selection && onSelectToggle) {
+			onSelectToggle(e, record.id);
+			return;
+		}
+		
 		const cb = {
 			0: () => {
 				keyboard.withCommand(e) ? U.Object.openEvent(e, record) : U.Object.openConfig(record); 
