@@ -41,6 +41,7 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 	searchIds = null;
 	filter = '';
 	editingRecordId: string = '';
+	selectionUpdateTimeout = 0;
 
 	constructor (props: Props) {
 		super(props);
@@ -325,6 +326,7 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 
 	componentWillUnmount () {
 		this.unbind();
+		window.clearTimeout(this.selectionUpdateTimeout);
 	};
 
 	init () {
@@ -1641,7 +1643,11 @@ const BlockDataview = observer(class BlockDataview extends React.Component<Props
 	onSelectionUpdate () {
 		// Only refresh if this DataView has "Currently Selected" filters
 		if (this.hasCurrentlySelectedFilter()) {
-			this.reloadData();
+			// Debounce to prevent infinite loops
+			window.clearTimeout(this.selectionUpdateTimeout);
+			this.selectionUpdateTimeout = window.setTimeout(() => {
+				this.reloadData();
+			}, 50);
 		}
 	};
 

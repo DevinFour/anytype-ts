@@ -218,22 +218,24 @@ class Dataview {
 	 * @returns {any} The mapped object.
 	 */
 	filterMapper (it: any) {
-		const relation = S.Record.getRelationByKey(it.relationKey);
+		// Create a copy to avoid mutating the original filter
+		const filter = U.Common.objectCopy(it);
+		const relation = S.Record.getRelationByKey(filter.relationKey);
 
 		if (relation) {
-			it.format = relation.format;
-			it.includeTime = relation.includeTime;
+			filter.format = relation.format;
+			filter.includeTime = relation.includeTime;
 		};
 
 		// Handle "Currently Selected" special filter value
-		if (Array.isArray(it.value) && it.value.includes('__currently_selected__')) {
+		if (Array.isArray(filter.value) && filter.value.includes('__currently_selected__')) {
 			const selection = S.Common.getRef('selectionProvider');
 			
 			// Get selected records (not blocks!)
 			const selectedIds = selection ? selection.get(I.SelectType.Record) : [];
 			
 			// Remove the special ID and add real selected IDs
-			let newValue = it.value.filter(id => id !== '__currently_selected__');
+			let newValue = filter.value.filter(id => id !== '__currently_selected__');
 			
 			if (selectedIds.length > 0) {
 				// Add selected object IDs to the filter
@@ -241,17 +243,16 @@ class Dataview {
 			}
 			
 			// Remove duplicates
-			it.value = [...new Set(newValue)];
-			
+			filter.value = [...new Set(newValue)];
 			
 			// If no real values, show nothing (empty filter)
-			if (it.value.length === 0) {
-				it.condition = I.FilterCondition.In;
-				it.value = ['__no_matches__']; // Use dummy ID that won't match anything
+			if (filter.value.length === 0) {
+				filter.condition = I.FilterCondition.In;
+				filter.value = ['__no_matches__']; // Use dummy ID that won't match anything
 			}
 		};
 
-		return it;
+		return filter;
 	};
 
 	/**

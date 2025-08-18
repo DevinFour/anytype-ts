@@ -157,19 +157,23 @@ const MenuDataviewFilterValues = observer(class MenuDataviewFilterValues extends
 					);
 				};
 
-				list = Relation.getArrayValue(item.value).map(it => S.Detail.get(subId, it, []));
+				// Get raw filter value
+				const rawValue = Relation.getArrayValue(item.value);
 				
 				// Check if "Currently Selected" is in the filter
-				const hasCurrentlySelected = list.find(it => it.id === '__currently_selected__');
+				const hasCurrentlySelected = rawValue.includes('__currently_selected__');
 				
-				// Filter out the special ID and get real objects
-				list = list.filter(it => it.id !== '__currently_selected__').filter(it => !it._empty_);
+				// Get real objects (excluding the special ID)
+				list = rawValue
+					.filter(id => id !== '__currently_selected__')
+					.map(it => S.Detail.get(subId, it, []))
+					.filter(it => !it._empty_);
 
 				// Create Currently Selected item if it's in the filter
 				let currentlySelectedItem = null;
 				if (hasCurrentlySelected) {
 					const selection = S.Common.getRef('selectionProvider');
-					const selectedIds = selection ? selection.get() : [];
+					const selectedIds = selection ? selection.get(I.SelectType.Record) : [];
 					currentlySelectedItem = {
 						id: '__currently_selected__',
 						name: selectedIds.length > 0 ? `Currently Selected (${selectedIds.length})` : 'Currently Selected',
