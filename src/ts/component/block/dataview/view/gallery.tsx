@@ -140,14 +140,18 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 						threshold={5}
 					>
 						{({ onRowsRendered }) => (
-							<List
-								height={containerHeight}
-								width={1000} // Large enough width for content
-								rowCount={items.length}
-								rowHeight={cardHeight}
-								onRowsRendered={onRowsRendered}
-								rowRenderer={rowRenderer}
-							/>
+							<AutoSizer disableHeight={true}>
+								{({ width }) => (
+									<List
+										height={containerHeight}
+										width={width}
+										rowCount={items.length}
+										rowHeight={cardHeight}
+										onRowsRendered={onRowsRendered}
+										rowRenderer={rowRenderer}
+									/>
+								)}
+							</AutoSizer>
 						)}
 					</InfiniteLoader>
 				</div>

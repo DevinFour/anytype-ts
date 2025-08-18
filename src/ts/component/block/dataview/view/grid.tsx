@@ -61,24 +61,28 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 						threshold={10}
 					>
 						{({ onRowsRendered }) => (
-							<List
-								height={containerHeight}
-								width={1000} // Large enough width for content
-								rowCount={length}
-								rowHeight={rowHeight}
-								onRowsRendered={onRowsRendered}
-								rowRenderer={({ key, index, style }) => (
-									<BodyRow 
-										key={`grid-row-inline-${view.id + index}`} 
-										{...this.props} 
-										recordId={records[index]}
-										recordIdx={index}
-										style={style}
-										cellPosition={this.cellPosition}
-										getColumnWidths={this.getColumnWidths}
+							<AutoSizer disableHeight={true}>
+								{({ width }) => (
+									<List
+										height={containerHeight}
+										width={width}
+										rowCount={length}
+										rowHeight={rowHeight}
+										onRowsRendered={onRowsRendered}
+										rowRenderer={({ key, index, style }) => (
+											<BodyRow 
+												key={`grid-row-inline-${view.id + index}`} 
+												{...this.props} 
+												recordId={records[index]}
+												recordIdx={index}
+												style={style}
+												cellPosition={this.cellPosition}
+												getColumnWidths={this.getColumnWidths}
+											/>
+										)}
 									/>
 								)}
-							/>
+							</AutoSizer>
 						)}
 					</InfiniteLoader>
 				</div>

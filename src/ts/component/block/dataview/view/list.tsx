@@ -52,13 +52,15 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 						threshold={10}
 					>
 						{({ onRowsRendered }) => (
-							<List
-								height={containerHeight}
-								width={1000} // Large enough width for content
-								rowCount={length}
-								rowHeight={rowHeight}
-								onRowsRendered={onRowsRendered}
-								rowRenderer={({ key, index, style }) => (
+							<AutoSizer disableHeight={true}>
+								{({ width }) => (
+									<List
+										height={containerHeight}
+										width={width}
+										rowCount={length}
+										rowHeight={rowHeight}
+										onRowsRendered={onRowsRendered}
+										rowRenderer={({ key, index, style }) => (
 									<Row
 										ref={ref => onRefRecord(ref, records[index])}
 										key={`list-row-inline-${view.id + index}`}
@@ -69,6 +71,8 @@ const ViewList = observer(class ViewList extends React.Component<I.ViewComponent
 									/>
 								)}
 							/>
+								)}
+							</AutoSizer>
 						)}
 					</InfiniteLoader>
 				</div>
