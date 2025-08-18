@@ -23,6 +23,12 @@ export enum TimeFormat {
 	H24				 = 1,
 };
 
+export enum ViewSize {
+	Small			 = 0,
+	Medium			 = 1,
+	Large			 = 2,
+};
+
 export enum ViewType {
 	Grid			 = 0,
 	List			 = 1,

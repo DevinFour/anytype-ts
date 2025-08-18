@@ -650,14 +650,31 @@ class Relation {
 	};
 
 	/**
-	 * Gets the fixed pixel height for inline views based on pageLimit.
-	 * This ensures consistent heights across all view types (Grid, List, Gallery, Graph).
-	 * @param {number} pageLimit - The page limit value.
-	 * @returns {number} The pixel height for the view container.
+	 * Gets size options for responsive inline views.
+	 * @returns {Array<{id: I.ViewSize, name: string}>} The size options.
 	 */
-	public getInlineViewHeight (pageLimit: number): number {
-		// Map pageLimit values to fixed pixel heights
-		// These provide consistent view sizes across all view types
+	public getViewSizeOptions () {
+		return U.Menu.prepareForSelect([
+			{ id: I.ViewSize.Small, name: translate('libRelationSmall') },
+			{ id: I.ViewSize.Medium, name: translate('libRelationMedium') },
+			{ id: I.ViewSize.Large, name: translate('libRelationLarge') },
+		]);
+	};
+
+	/**
+	 * Gets the height for inline views. Uses responsive sizing by default.
+	 * @param {number} pageLimit - The page limit value (automatically converted to ViewSize).
+	 * @param {boolean} useResponsive - Whether to use responsive heights (default: true).
+	 * @returns {number} The responsive height for the view container.
+	 */
+	public getInlineViewHeight (pageLimit: number, useResponsive: boolean = true): number {
+		if (useResponsive) {
+			// Convert pageLimit to ViewSize and use responsive heights
+			const viewSize = this.mapPageLimitToViewSize(pageLimit);
+			return this.getResponsiveViewHeight(viewSize);
+		}
+
+		// Legacy fixed height mapping (for backwards compatibility)
 		const heightMap: { [key: number]: number } = {
 			10: 400,   // Extra small
 			12: 400,   // Small (Gallery) - same as 10
@@ -673,6 +690,51 @@ class Relation {
 
 		// Return mapped height or default 600
 		return heightMap[pageLimit] || 600;
+	};
+
+	/**
+	 * Gets fixed pixel height for inline views based on ViewSize.
+	 * Simple, predictable heights that work consistently across all view types.
+	 * @param {I.ViewSize} viewSize - The view size (Small/Medium/Large).
+	 * @returns {number} The fixed pixel height for the view container.
+	 */
+	public getResponsiveViewHeight (viewSize: I.ViewSize): number {
+		// Fixed heights that are logical and consistent
+		const fixedHeights = {
+			[I.ViewSize.Small]: 300,   // Small = 300px
+			[I.ViewSize.Medium]: 500,  // Medium = 500px  
+			[I.ViewSize.Large]: 700    // Large = 700px
+		};
+
+		return fixedHeights[viewSize] || fixedHeights[I.ViewSize.Medium];
+	};
+
+
+	/**
+	 * Maps ViewSize to equivalent PageLimit for backwards compatibility.
+	 * @param {I.ViewSize} viewSize - The view size enum value.
+	 * @returns {number} The equivalent pageLimit value.
+	 */
+	public mapViewSizeToPageLimit (viewSize: I.ViewSize): number {
+		const sizeToPageLimitMap = {
+			[I.ViewSize.Small]: 20,   // Maps to 500px in old system
+			[I.ViewSize.Medium]: 70,  // Maps to 700px in old system
+			[I.ViewSize.Large]: 100   // Maps to 800px in old system
+		};
+
+		return sizeToPageLimitMap[viewSize] || sizeToPageLimitMap[I.ViewSize.Medium];
+	};
+
+	/**
+	 * Maps PageLimit to ViewSize for UI display purposes.
+	 * @param {number} pageLimit - The current pageLimit value.
+	 * @returns {I.ViewSize} The equivalent ViewSize enum value.
+	 */
+	public mapPageLimitToViewSize (pageLimit: number): I.ViewSize {
+		// Map pageLimit ranges to ViewSize
+		if (pageLimit <= 25) return I.ViewSize.Small;
+		if (pageLimit <= 80) return I.ViewSize.Medium;
+		return I.ViewSize.Large;
 	};
 
 	/**

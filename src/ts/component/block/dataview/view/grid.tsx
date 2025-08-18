@@ -41,10 +41,10 @@ const ViewGrid = observer(class ViewGrid extends React.Component<I.ViewComponent
 		const isAllowedObject = this.props.isAllowedObject();
 		const cn = [ 'viewContent', className ];
 		
-		// Calculate total view height for inline mode
+		// Calculate total view height for inline mode with responsive sizing
 		const wrapperStyle: any = {};
 		if (isInline) {
-			wrapperStyle.height = Relation.getInlineViewHeight(limit);
+			wrapperStyle.height = Relation.getInlineViewHeight(limit); // Use numeric height for react-virtualized
 			wrapperStyle.overflow = 'hidden';
 		}
 

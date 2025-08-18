@@ -274,8 +274,10 @@ const MenuViewLayout = observer(class MenuViewLayout extends React.Component<I.M
 		};
 
 		if (isInline || isBoard || isGallery) {
-			const options = Relation.getPageLimitOptions(type, isInline);
-			settings.push({ id: 'pageLimit', name: translate('menuDataviewViewEditPageLimit'), caption: (pageLimit || options[0].id), arrow: true });
+			const viewSize = Relation.mapPageLimitToViewSize(pageLimit || 20);
+			const sizeOptions = Relation.getViewSizeOptions();
+			const currentSizeOption = sizeOptions.find(it => it.id == viewSize);
+			settings.push({ id: 'viewSize', name: translate('menuDataviewViewEditSize'), caption: (currentSizeOption ? currentSizeOption.name : translate('libRelationMedium')), arrow: true });
 		};
 
 		let sections: any[] = [ 
@@ -366,6 +368,11 @@ const MenuViewLayout = observer(class MenuViewLayout extends React.Component<I.M
 				onSelect: (e: any, el: any) => {
 					if (el.id == 'addRelation') {
 						this.onAddRelation(item.id);
+					} else if (item.id == 'viewSize') {
+						// Convert ViewSize to pageLimit for storage
+						this.param.pageLimit = Relation.mapViewSizeToPageLimit(el.id);
+						this.save();
+						this.menuContext.close();
 					} else {
 						this.param[item.id] = el.id;
 						this.save();
@@ -405,10 +412,11 @@ const MenuViewLayout = observer(class MenuViewLayout extends React.Component<I.M
 				break;
 			};
 
-			case 'pageLimit': {
+			case 'viewSize': {
 				menuId = 'select';
 				menuParam.data = Object.assign(menuParam.data, {
-					options: Relation.getPageLimitOptions(type, isInline),
+					value: Relation.mapPageLimitToViewSize(this.param.pageLimit || 20),
+					options: Relation.getViewSizeOptions(),
 				});
 				break;
 			};

@@ -125,8 +125,7 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 			// Use InfiniteLoader for inline mode
 			const view = getView();
 			const limit = getLimit();
-			const viewHeight = Relation.getInlineViewHeight(limit);
-			const containerHeight = viewHeight;
+			const containerHeight = Relation.getInlineViewHeight(limit); // Use numeric height for react-virtualized
 			const cardHeight = this.getCardHeight();
 			
 			content = (
