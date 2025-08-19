@@ -120,3 +120,66 @@ Anytype is an Electron-based desktop application with TypeScript/React frontend 
 - Use existing utility functions in `lib/util/` before creating new ones
 - Follow existing component patterns in `component/` directory
 - Store updates should trigger UI re-renders automatically via MobX
+
+## Git Workflow
+
+This fork uses a structured Git workflow to maintain sync with upstream while preserving custom features.
+
+### Branch Structure
+
+```
+main → always synced with upstream anytype-ts
+├── my-development → personal stable branch (based on main)
+│   ├── feature/cross-view-selection → feature branch (based on my-development)
+│   └── feature/... → future feature branches (based on my-development)
+└── pr/... → clean PR branches (based on main, cherry-picked from features)
+```
+
+**Branch hierarchy:**
+- `main > my-development` - my-development branches from main
+- `my-development > feature/xyz` - feature branches from my-development  
+- `main > pr/xyz` - PR branches from main (not from my-development)
+
+### Remotes
+
+- `origin` - Your fork (github.com/DevinFour/anytype-ts)
+- `upstream` - Original repo (github.com/anyproto/anytype-ts)
+
+### Common Operations
+
+**Start new feature:**
+```bash
+git checkout my-development
+git checkout -b feature/new-feature-name
+# develop your feature...
+git commit -m "Add new feature"
+git checkout my-development
+git merge feature/new-feature-name
+```
+
+**Update from upstream:**
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main --no-edit
+git checkout my-development  
+git merge main --no-edit
+git push origin my-development
+```
+
+**Create clean PR for upstream:**
+```bash
+git checkout main
+git checkout -b pr/clean-feature-name
+git cherry-pick <commit-hash-1> <commit-hash-2>
+git push origin pr/clean-feature-name
+# Create PR from pr/clean-feature-name → upstream/main
+```
+
+### Key Principles
+
+1. **main** stays 100% clean and synced with upstream
+2. **my-development** is your working branch with all features
+3. **feature/** branches for isolated development
+4. **pr/** branches for contributing back to upstream
+5. Use cherry-pick to create clean PRs without custom patches
