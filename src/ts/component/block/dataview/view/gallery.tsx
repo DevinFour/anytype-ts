@@ -158,7 +158,7 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 		const wrapperStyle: any = {};
 		if (isInline) {
 			wrapperStyle.height = Relation.getInlineViewHeight(limit);
-			wrapperStyle.overflow = 'hidden';
+			wrapperStyle.overflow = 'auto'; // Enable scrolling
 		}
 
 		return (
@@ -168,7 +168,7 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 						{content}
 					</div>
 
-					{limit + offset < total && !isInline ? (
+					{limit + offset < total ? (
 						<LoadMore limit={limit} loaded={records.length} total={total} onClick={this.loadMoreCards} />
 					) : ''}
 				</div>
