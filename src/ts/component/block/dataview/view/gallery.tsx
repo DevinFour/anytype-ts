@@ -122,42 +122,12 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 		let content = null;
 
 		if (isInline) {
-			// Use InfiniteLoader for inline mode
-			const containerHeight = Relation.getInlineViewHeight(limit);
-			const dataHeight = containerHeight - 40; // Subtract space for "New Object" button
-			const cardHeight = this.getCardHeight();
-			
+			// Use original simple approach with responsive height
+			const records = this.getRecords();
 			content = (
-				<div style={{ height: dataHeight, overflow: 'auto' }}>
-					<InfiniteLoader
-						isRowLoaded={({ index }) => !!items[index]}
-						loadMoreRows={this.loadMoreCards}
-						rowCount={items.length}
-						threshold={5}
-					>
-						{({ onRowsRendered }) => (
-							<AutoSizer disableHeight={true}>
-								{({ width }) => {
-									// Set width for inline mode so getItems() works
-									if (width && !this.width) {
-										this.width = width;
-										this.setColumnCount();
-									}
-									return (
-										<List
-											height={dataHeight}
-											width={width}
-											rowCount={items.length}
-											rowHeight={cardHeight}
-											onRowsRendered={onRowsRendered}
-											rowRenderer={rowRenderer}
-										/>
-									);
-								}}
-							</AutoSizer>
-						)}
-					</InfiniteLoader>
-				</div>
+				<>
+					{records.map((id: string, index: number) => cardItem(index, id))}
+				</>
 			);
 		} else {
 			content = (
@@ -184,14 +154,23 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 			);
 		};
 
+		// Add responsive height for inline mode
+		const wrapperStyle: any = {};
+		if (isInline) {
+			wrapperStyle.height = Relation.getInlineViewHeight(limit);
+			wrapperStyle.overflow = 'hidden';
+		}
+
 		return (
 			<div className="wrap">
-				<div className={cn.join(' ')}>
+				<div className={cn.join(' ')} style={wrapperStyle}>
 					<div className={[ 'galleryWrap', U.Data.cardSizeClass(cardSize) ].join(' ')}>
 						{content}
 					</div>
 
-					{/* LoadMore removed - using InfiniteLoader for inline mode */}
+					{limit + offset < total && !isInline ? (
+						<LoadMore limit={limit} loaded={records.length} total={total} onClick={this.loadMoreCards} />
+					) : ''}
 				</div>
 			</div>
 		);
@@ -285,16 +264,11 @@ const ViewGallery = observer(class ViewGallery extends React.Component<I.ViewCom
 	};
 
 	getItems () {
-		const { isInline } = this.props;
-		
-		// For inline mode, use default column count if width not set yet
-		if (!this.width && isInline) {
-			this.columnCount = 1; // Default to single column for inline
-		} else if (!this.width) {
+		if (!this.width) {
 			return [];
-		} else {
-			this.setColumnCount();
-		}
+		};
+
+		this.setColumnCount();
 
 		const records = this.getRecords();
 		const ret: any[] = [];
