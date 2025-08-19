@@ -64,10 +64,19 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		win.on(`updateGraphData.${id}`, () => load());
 		win.on(`removeGraphNode.${id}`, (e: any, data: any) => send('onRemoveNode', { ids: U.Common.objectCopy(data.ids) }));
 		win.on(`keydown.${id}`, e => onKeyDown(e));
+		
+		// Listen for selection changes from other DataViews
+		win.on(`selectionSet.${id} selectionClear.${id}`, () => {
+			const selection = S.Common.getRef('selectionProvider');
+			const selectedIds = selection?.get(I.SelectType.Record) || [];
+			
+			// Update Graph internal selection without triggering sync back
+			setSelectedInternal(selectedIds);
+		});
 	};
 
 	const unbind = () => {
-		const events = [ 'updateGraphSettings', 'updateGraphRoot', 'updateGraphData', 'removeGraphNode', 'keydown' ];
+		const events = [ 'updateGraphSettings', 'updateGraphRoot', 'updateGraphData', 'removeGraphNode', 'keydown', 'selectionSet', 'selectionClear' ];
 
 		$(window).off(events.map(it => `${it}.${id}`).join(' '));
 		$(canvas.current).off('touchstart touchmove');
@@ -372,9 +381,13 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		switch (id) {
 			case 'onClick': {
 				if (data.node){
-					onClickObject(data.node);
+					onClickObject(data.node, data.event);
 				} else {
-					setSelected([]);
+					// Clear both internal and SelectionProvider selections
+					const selection = S.Common.getRef('selectionProvider');
+					selection?.set(I.SelectType.Record, []);
+					$(window).trigger('selectionClear');
+					setSelectedInternal([]);
 				};
 				break;
 			};
@@ -582,10 +595,34 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		setSelected(ids.current);
 	};
 
-	const onClickObject = (id: string) => {
-		setSelected([]);
-		onPreviewHide();
-		U.Object.openConfig(getNode(id));
+	const onClickObject = (id: string, event?: any) => {
+		const selection = S.Common.getRef('selectionProvider');
+		const selectedIds = selection?.get(I.SelectType.Record) || [];
+		const isSelected = selectedIds.includes(id);
+		
+		// Handle selection logic like other DataViews
+		if (event?.shiftKey || event?.ctrlKey || event?.metaKey) {
+			// Multi-select: toggle selection
+			let newIds;
+			if (isSelected) {
+				newIds = selectedIds.filter(selectedId => selectedId !== id);
+			} else {
+				newIds = [...selectedIds, id];
+			}
+			selection?.set(I.SelectType.Record, newIds);
+			$(window).trigger('selectionSet');
+		} else {
+			// Single click logic
+			if (isSelected && selectedIds.length === 1) {
+				// Already selected single item - navigate
+				onPreviewHide();
+				U.Object.openConfig(getNode(id));
+			} else {
+				// Select this item (clear others first)
+				selection?.set(I.SelectType.Record, [id]);
+				$(window).trigger('selectionSet');
+			}
+		}
 	};
 
 	const addNewNode = (id: string, sourceId?: string, param?: any, callBack?: (object: any) => void) => {
@@ -613,9 +650,21 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		send('setRootId', { rootId: id });
 	};
 
-	const setSelected = (selected: string[]) => {
+	const setSelectedInternal = (selected: string[]) => {
+		// Update only internal Graph state, don't sync to SelectionProvider
 		ids.current = selected;
 		send('onSetSelected', { ids: ids.current });
+	};
+
+	const setSelected = (selected: string[]) => {
+		setSelectedInternal(selected);
+		
+		// Sync with SelectionProvider so other views see the Graph selections
+		const selection = S.Common.getRef('selectionProvider');
+		if (selection) {
+			selection.set(I.SelectType.Record, selected);
+			$(window).trigger(selected.length ? 'selectionSet' : 'selectionClear');
+		}
 	};
 
 	const resize = () => {
