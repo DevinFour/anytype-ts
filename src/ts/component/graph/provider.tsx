@@ -611,6 +611,7 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 			}
 			selection?.set(I.SelectType.Record, newIds);
 			$(window).trigger('selectionSet');
+			setSelectedInternal(newIds); // This triggers Graph highlighting
 		} else {
 			// Single click logic
 			if (isSelected && selectedIds.length === 1) {
@@ -618,9 +619,10 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 				onPreviewHide();
 				U.Object.openConfig(getNode(id));
 			} else {
-				// Select this item (clear others first)
+				// Select this item (clear others first) AND update internal Graph selection for highlighting
 				selection?.set(I.SelectType.Record, [id]);
 				$(window).trigger('selectionSet');
+				setSelectedInternal([id]); // This triggers Graph highlighting
 			}
 		}
 	};
